@@ -1,0 +1,62 @@
+version: '3'
+
+services:
+  db-postgres:
+    image: postgres:14.20-alpine
+    container_name: postgres-container
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - C:\Docker\postgres\data:/var/lib/postgresql/data
+    restart: always
+
+  s3-localstack:
+    image: localstack/localstack:2026.4
+    container_name: s3-localstack-container
+    environment:
+      - LOCALSTACK_AUTH_TOKEN=ls-ZOvODaNU-ZIKa-beWO-yiME-xEgE429569b2
+    ports:
+      - "4566:4566"
+      - "4510-4559:4510-4559"
+    restart: always
+
+  mq-rabbitmq:
+    image: rabbitmq:3-management
+    container_name: mq-rabbitmq-container
+    environment:
+      - RABBITMQ_DEFAULT_USER=rabbitmq
+      - RABBITMQ_DEFAULT_PASS=rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: always
+
+  cache-redis:
+    image: redis:8.6.3-alpine
+    container_name: cache-redis-container
+    ports:
+      - "6379:6379"
+    restart: always
+
+  obs-zipkin:
+    image: openzipkin/zipkin:3
+    container_name: obs-zipkin-container
+    ports:
+      - "9411:9411"
+    restart: always
+
+  api-producto:
+    image: api-producto
+    container_name: api-producto-container
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db-postgres
+      - s3-localstack
+      - mq-rabbitmq
+      - cache-redis
+      - obs-zipkin
